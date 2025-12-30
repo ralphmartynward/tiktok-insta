@@ -1,0 +1,33 @@
+name: Daily pipeline
+
+on:
+  schedule:
+    - cron: "15 9 * * *"   # daily 09:15 UTC
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          APIFY_ACTOR_ID: ${{ secrets.APIFY_ACTOR_ID }}
+          HASHTAG: oddlysatisfying
+          VIDEOS_PER_RUN: "50"
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          GDRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}
+        run: python pipeline.py
