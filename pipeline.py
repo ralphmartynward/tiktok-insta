@@ -149,7 +149,7 @@ def upload_to_drive(file_path: str, folder_id: str) -> str:
         json.loads(SA_JSON),
         scopes=["https://www.googleapis.com/auth/drive.file"],
     )
-    service = build("drive", "v3", credentials=creds)
+    service = build("drive", "v3", credentials=creds, cache_discovery=False)
 
     filename = os.path.basename(file_path)
     media = MediaFileUpload(file_path, mimetype="video/mp4", resumable=True)
@@ -161,7 +161,8 @@ def upload_to_drive(file_path: str, folder_id: str) -> str:
     created = service.files().create(
         body=file_metadata,
         media_body=media,
-        fields="id, name"
+        fields="id, name",
+        supportsAllDrives=True,
     ).execute()
 
     return created["id"]
